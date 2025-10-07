@@ -347,7 +347,17 @@ class DAO
     // --------------------------------------------------------------------------------------
     // début de la zone attribuée au développeur 1 (Adrien Sudja) : lignes 350 à 549
     // --------------------------------------------------------------------------------------
-    
+    public function existeAdrMailUtilisateur($adrMail)
+    {
+        if ($adrMail = sizeof($this->$unUtilisateur));
+        {
+            return true;
+        }
+            
+        else {
+            return False;
+        }
+    }
 
     
     
