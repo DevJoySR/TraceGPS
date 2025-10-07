@@ -160,15 +160,15 @@ class DAO
         }
         else {
             // création d'un objet Utilisateur
-            $unId = utf8_encode($uneLigne->id);
-            $unPseudo = utf8_encode($uneLigne->pseudo);
-            $unMdpSha1 = utf8_encode($uneLigne->mdpSha1);
-            $uneAdrMail = utf8_encode($uneLigne->adrMail);
-            $unNumTel = utf8_encode($uneLigne->numTel);
-            $unNiveau = utf8_encode($uneLigne->niveau);
-            $uneDateCreation = utf8_encode($uneLigne->dateCreation);
-            $unNbTraces = utf8_encode($uneLigne->nbTraces);
-            $uneDateDerniereTrace = utf8_encode($uneLigne->dateDerniereTrace);
+            $unId = mb_convert_encoding($uneLigne->id, 'UTF-8', 'ISO-8859-1');
+            $unPseudo = mb_convert_encoding($uneLigne->pseudo, 'UTF-8', 'ISO-8859-1');
+            $unMdpSha1 = mb_convert_encoding($uneLigne->mdpSha1, 'UTF-8', 'ISO-8859-1');
+            $uneAdrMail = mb_convert_encoding($uneLigne->adrMail, 'UTF-8', 'ISO-8859-1');
+            $unNumTel = mb_convert_encoding($uneLigne->numTel, 'UTF-8', 'ISO-8859-1');
+            $unNiveau = mb_convert_encoding($uneLigne->niveau, 'UTF-8', 'ISO-8859-1');
+            $uneDateCreation = mb_convert_encoding($uneLigne->dateCreation, 'UTF-8', 'ISO-8859-1');
+            $unNbTraces = mb_convert_encoding($uneLigne->nbTraces, 'UTF-8', 'ISO-8859-1');
+            $uneDateDerniereTrace = mb_convert_encoding($uneLigne->dateDerniereTrace, 'UTF-8', 'ISO-8859-1');
             
             $unUtilisateur = new Utilisateur($unId, $unPseudo, $unMdpSha1, $uneAdrMail, $unNumTel, $unNiveau, $uneDateCreation, $unNbTraces, $uneDateDerniereTrace);
             return $unUtilisateur;
@@ -196,15 +196,15 @@ class DAO
         // tant qu'une ligne est trouvée :
         while ($uneLigne) {
             // création d'un objet Utilisateur
-            $unId = utf8_encode($uneLigne->id);
-            $unPseudo = utf8_encode($uneLigne->pseudo);
-            $unMdpSha1 = utf8_encode($uneLigne->mdpSha1);
-            $uneAdrMail = utf8_encode($uneLigne->adrMail);
-            $unNumTel = utf8_encode($uneLigne->numTel);
-            $unNiveau = utf8_encode($uneLigne->niveau);
-            $uneDateCreation = utf8_encode($uneLigne->dateCreation);
-            $unNbTraces = utf8_encode($uneLigne->nbTraces);
-            $uneDateDerniereTrace = utf8_encode($uneLigne->dateDerniereTrace);
+            $unId = mb_convert_encoding($uneLigne->id, 'UTF-8', 'ISO-8859-1');
+            $unPseudo = mb_convert_encoding($uneLigne->pseudo, 'UTF-8', 'ISO-8859-1');
+            $unMdpSha1 = mb_convert_encoding($uneLigne->mdpSha1, 'UTF-8', 'ISO-8859-1');
+            $uneAdrMail = mb_convert_encoding($uneLigne->adrMail, 'UTF-8', 'ISO-8859-1');
+            $unNumTel = mb_convert_encoding($uneLigne->numTel, 'UTF-8', 'ISO-8859-1');
+            $unNiveau = mb_convert_encoding($uneLigne->niveau, 'UTF-8', 'ISO-8859-1');
+            $uneDateCreation = mb_convert_encoding($uneLigne->dateCreation, 'UTF-8', 'ISO-8859-1');
+            $unNbTraces = mb_convert_encoding($uneLigne->nbTraces, 'UTF-8', 'ISO-8859-1');
+            $uneDateDerniereTrace = mb_convert_encoding($uneLigne->dateDerniereTrace, 'UTF-8', 'ISO-8859-1');
             
             $unUtilisateur = new Utilisateur($unId, $unPseudo, $unMdpSha1, $uneAdrMail, $unNumTel, $unNiveau, $uneDateCreation, $unNbTraces, $uneDateDerniereTrace);
             // ajout de l'utilisateur à la collection
@@ -375,6 +375,132 @@ class DAO
             return false;
         }
     }
+
+    public function getLesUtilisateursAutorisant($idUtilisateur)
+    /*
+    *   Fournit la collection des utilisateurs (de niveau 1) autorisant l'utilisateur $idUtilisateur à voir leurs parcours
+    *   
+    *   @param : string $idUtilisateur
+    *   @returns : la collection des utilisateurs qui ont donné l'autorisation à $idUtilisateur, soit collection d'objets Utilisateur
+    */
+    {
+        // préparation de la requête de recherche
+        $txt_req = "SELECT tracegps_vue_utilisateurs.id, tracegps_vue_utilisateurs.pseudo, tracegps_vue_utilisateurs.mdpSha1, tracegps_vue_utilisateurs.adrMail, ";
+        $txt_req .= "tracegps_vue_utilisateurs.numTel, tracegps_vue_utilisateurs.niveau, tracegps_vue_utilisateurs.dateCreation, tracegps_vue_utilisateurs.dateDerniereTrace, ";
+        $txt_req .= "(SELECT COUNT(*) FROM tracegps_traces WHERE tracegps_traces.idUtilisateur = tracegps_vue_utilisateurs.id) AS nbTraces, ";
+        $txt_req .= "tracegps_autorisations.idAutorisant ";
+        $txt_req .= "FROM tracegps_vue_utilisateurs ";
+        $txt_req .= "INNER JOIN tracegps_autorisations ON tracegps_vue_utilisateurs.id = tracegps_autorisations.idAutorisant ";
+        $txt_req .= "WHERE tracegps_vue_utilisateurs.niveau = 1 AND tracegps_autorisations.idAutorise = :idUtilisateur ";
+        $txt_req .= "ORDER BY tracegps_vue_utilisateurs.pseudo";
+
+    $req = $this->cnx->prepare($txt_req);
+
+    // liaison de la requête et de ses paramètres
+    $req->bindValue(":idUtilisateur", $idUtilisateur, PDO::PARAM_INT);
+    
+    // exécution de la requête
+    $req->execute();
+
+    // construction d'une collection d'objets Utilisateur
+    $lesUtilisateurs = array();
+
+    // tant qu'une ligne est trouvée :
+    while ($uneLigne = $req->fetch(PDO::FETCH_OBJ)) {
+        // création d'un objet Utilisateur
+        $unId = mb_convert_encoding($uneLigne->id, 'UTF-8', 'ISO-8859-1');
+        $unPseudo = mb_convert_encoding($uneLigne->pseudo, 'UTF-8', 'ISO-8859-1');
+        $unMdpSha1 = mb_convert_encoding($uneLigne->mdpSha1, 'UTF-8', 'ISO-8859-1');
+        $uneAdrMail = mb_convert_encoding($uneLigne->adrMail, 'UTF-8', 'ISO-8859-1');
+        $unNumTel = mb_convert_encoding($uneLigne->numTel, 'UTF-8', 'ISO-8859-1');
+        $unNiveau = mb_convert_encoding($uneLigne->niveau, 'UTF-8', 'ISO-8859-1');
+        $uneDateCreation = mb_convert_encoding($uneLigne->dateCreation, 'UTF-8', 'ISO-8859-1');
+        $unNbTraces = mb_convert_encoding($uneLigne->nbTraces, 'UTF-8', 'ISO-8859-1');
+        $uneDateDerniereTrace = mb_convert_encoding($uneLigne->dateDerniereTrace, 'UTF-8', 'ISO-8859-1');
+
+        $unUtilisateur = new Utilisateur(
+            $unId,
+            $unPseudo,
+            $unMdpSha1,
+            $uneAdrMail,
+            $unNumTel,
+            $unNiveau,
+            $uneDateCreation,
+            $unNbTraces,
+            $uneDateDerniereTrace
+        );
+
+        // ajout de l'utilisateur à la collection
+        $lesUtilisateurs[] = $unUtilisateur;
+    }
+
+    $req->closeCursor();
+
+    return $lesUtilisateurs;
+}
+
+    public function getLesUtilisateursAutorises($idUtilisateur)
+    /*
+    *   Fournit la collection des utilisateurs (de niveau 1) autorisés à voir les parcours de l'utilisateur $idUtilisateur
+    *   
+    *   @param : string $idUtilisateur
+    *   @returns : la collection des utilisateurs qui ont donné l'autorisation à $idUtilisateur, soit collection d'objets Utilisateur
+    */
+    {
+        // préparation de la requête de recherche
+        $txt_req = "SELECT tracegps_vue_utilisateurs.id, tracegps_vue_utilisateurs.pseudo, tracegps_vue_utilisateurs.mdpSha1, tracegps_vue_utilisateurs.adrMail, ";
+        $txt_req .= "tracegps_vue_utilisateurs.numTel, tracegps_vue_utilisateurs.niveau, tracegps_vue_utilisateurs.dateCreation, tracegps_vue_utilisateurs.dateDerniereTrace, ";
+        $txt_req .= "(SELECT COUNT(*) FROM tracegps_traces WHERE tracegps_traces.idUtilisateur = tracegps_vue_utilisateurs.id) AS nbTraces, ";
+        $txt_req .= "tracegps_autorisations.idAutorise ";
+        $txt_req .= "FROM tracegps_vue_utilisateurs ";
+        $txt_req .= "INNER JOIN tracegps_autorisations ON tracegps_vue_utilisateurs.id = tracegps_autorisations.idAutorise ";
+        $txt_req .= "WHERE tracegps_vue_utilisateurs.niveau = 1 AND tracegps_autorisations.idAutorise = :idUtilisateur ";
+        $txt_req .= "ORDER BY tracegps_vue_utilisateurs.pseudo";
+
+    $req = $this->cnx->prepare($txt_req);
+
+    // liaison de la requête et de ses paramètres
+    $req->bindValue(":idUtilisateur", $idUtilisateur, PDO::PARAM_INT);
+    
+    // exécution de la requête
+    $req->execute();
+
+    // construction d'une collection d'objets Utilisateur
+    $lesUtilisateurs = array();
+
+    // tant qu'une ligne est trouvée :
+    while ($uneLigne = $req->fetch(PDO::FETCH_OBJ)) {
+        // création d'un objet Utilisateur
+        $unId = mb_convert_encoding($uneLigne->id, 'UTF-8', 'ISO-8859-1');
+        $unPseudo = mb_convert_encoding($uneLigne->pseudo, 'UTF-8', 'ISO-8859-1');
+        $unMdpSha1 = mb_convert_encoding($uneLigne->mdpSha1, 'UTF-8', 'ISO-8859-1');
+        $uneAdrMail = mb_convert_encoding($uneLigne->adrMail, 'UTF-8', 'ISO-8859-1');
+        $unNumTel = mb_convert_encoding($uneLigne->numTel, 'UTF-8', 'ISO-8859-1');
+        $unNiveau = mb_convert_encoding($uneLigne->niveau, 'UTF-8', 'ISO-8859-1');
+        $uneDateCreation = mb_convert_encoding($uneLigne->dateCreation, 'UTF-8', 'ISO-8859-1');
+        $unNbTraces = mb_convert_encoding($uneLigne->nbTraces, 'UTF-8', 'ISO-8859-1');
+        $uneDateDerniereTrace = mb_convert_encoding($uneLigne->dateDerniereTrace, 'UTF-8', 'ISO-8859-1');
+
+        $unUtilisateur = new Utilisateur(
+            $unId,
+            $unPseudo,
+            $unMdpSha1,
+            $uneAdrMail,
+            $unNumTel,
+            $unNiveau,
+            $uneDateCreation,
+            $unNbTraces,
+            $uneDateDerniereTrace
+        );
+
+        // ajout de l'utilisateur à la collection
+        $lesUtilisateurs[] = $unUtilisateur;
+    }
+
+    $req->closeCursor();
+
+    return $lesUtilisateurs;
+}
 
 
     
