@@ -349,7 +349,7 @@ class DAO
     // --------------------------------------------------------------------------------------
     public function existeAdrMailUtilisateur($adrMail)
     """
-    Vérifie si une adresse mail existe dans la table tracegps_utilisateurs
+    Indique si $adrMail existe dans la table tracegps_utilisateurs
 
     Param : string $adrMail
     Returns : bool True si l'adresse existe ou au contraire, false
