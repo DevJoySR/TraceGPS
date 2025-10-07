@@ -348,16 +348,33 @@ class DAO
     // début de la zone attribuée au développeur 1 (Adrien Sudja) : lignes 350 à 549
     // --------------------------------------------------------------------------------------
     public function existeAdrMailUtilisateur($adrMail)
+    """
+    Vérifie si une adresse mail existe dans la table tracegps_utilisateurs
+
+    Param : string $adrMail
+    Returns : bool True si l'adresse existe ou au contraire, false
+    """
     {
-        if ($adrMail = sizeof($this->$unUtilisateur));
-        {
+        // préparation de la requête de recherche
+        $txt_req = "select * from tracegps_utilisateurs where adrMail = :adrMail";
+        $req = $this->cnx->prepare($txt_req);
+
+        // liaison de la requête et de ses paramètres
+        $req->bindValue(":adrMail", $adrMail, PDO::PARAM_STR);
+
+        // exécution de la requête
+        $req->execute();
+
+        // extrait la ligne suivante
+        $resultat = $req->fetch(PDO::FETCH_OBJ);
+
+        if ($resultat) {
             return true;
-        }
-            
-        else {
-            return False;
+        } else {
+            return false;
         }
     }
+
 
     
     
