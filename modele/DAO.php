@@ -38,7 +38,7 @@
 
 // certaines méthodes nécessitent les classes suivantes :
 include_once ('Utilisateur.php');
-include_once ('Trace.php');
+include_once ('Trace.class.php');
 include_once ('PointDeTrace.php');
 include_once ('Point.php');
 include_once ('Outils.php');
@@ -348,12 +348,12 @@ class DAO
     // début de la zone attribuée au développeur 1 (Adrien Sudja) : lignes 350 à 549
     // --------------------------------------------------------------------------------------
     public function existeAdrMailUtilisateur($adrMail)
-    """
-    Indique si $adrMail existe dans la table tracegps_utilisateurs
-
-    Param : string $adrMail
-    Returns : bool True si l'adresse existe ou au contraire, false
-    """
+    /*
+    *   Indique si $adrMail existe dans la table tracegps_utilisateurs
+    *
+    *   @param : string $adrMail
+    *   @returns : bool True si l'adresse existe ou au contraire, false
+    */
     {
         // préparation de la requête de recherche
         $txt_req = "select * from tracegps_utilisateurs where adrMail = :adrMail";
@@ -370,7 +370,8 @@ class DAO
 
         if ($resultat) {
             return true;
-        } else {
+        } 
+        else {
             return false;
         }
     }
