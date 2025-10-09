@@ -454,7 +454,7 @@ class DAO
         $txt_req .= "tracegps_autorisations.idAutorise ";
         $txt_req .= "FROM tracegps_vue_utilisateurs ";
         $txt_req .= "INNER JOIN tracegps_autorisations ON tracegps_vue_utilisateurs.id = tracegps_autorisations.idAutorise ";
-        $txt_req .= "WHERE tracegps_vue_utilisateurs.niveau = 1 AND tracegps_autorisations.idAutorise = :idUtilisateur ";
+        $txt_req .= "WHERE tracegps_vue_utilisateurs.niveau = 1 AND tracegps_autorisations.idAutorisant = :idUtilisateur ";
         $txt_req .= "ORDER BY tracegps_vue_utilisateurs.pseudo";
 
     $req = $this->cnx->prepare($txt_req);
@@ -501,6 +501,17 @@ class DAO
 
     return $lesUtilisateurs;
 }
+
+    public function autoriseAConsulter($idAutorisant, $idAutorise)
+    /*
+    *    Indique si l'utilisateur $idAutorisant autorise l'utilisateur $idAutorise à consulter ses traces
+    *   
+    *   @param : $idAutorisant : l'id de l'utilisateur qui autorise
+    *            $idAutorise : l'id de l'utilisateur qui est autorisé
+    *   @returns : true si l'autorisation est donnée false sinon
+    */
+
+
 
 
     
